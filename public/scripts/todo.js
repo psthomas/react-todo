@@ -5,6 +5,7 @@ class TodoBox extends React.Component {
         super(props);
         this.state = { data: [] };
         this.loadList = this.loadList.bind(this);
+        this.addTodo = this.addTodo.bind(this);
     }
     
     
@@ -19,6 +20,30 @@ class TodoBox extends React.Component {
               error: function(xhr, status, err) {
                 console.error(this.props.url, status, err.toString());
               }.bind(this)
+        });
+    }
+    
+    addTodo(detailValue) {
+        let newData = this.state.data;
+        let newComment = {
+            detail: detailValue,
+            id: Date.now()
+        }
+        newData.push(newComment);
+        console.log(newData);
+        this.setState({data: newData});
+        $.ajax({
+          url: this.props.url,
+          dataType: 'json',
+          type: 'POST',
+          data: newComment,
+          success: function(data) {
+            this.setState({data: data});
+          }.bind(this),
+          error: function(xhr, status, err) {
+            this.setState({data: newData});
+            console.error(this.props.url, status, err.toString());
+          }.bind(this)
         });
     }
     
@@ -37,7 +62,7 @@ class TodoBox extends React.Component {
         return (
             <div style={style.todoBox}>
                 <h1 style={style.header}>To do:</h1>
-                <TodoList url={this.props.url} data={this.state.data}/>
+                <TodoList url={this.props.url} addTodo={this.addTodo} data={this.state.data}/>
             </div>
         );
     }
@@ -51,7 +76,7 @@ class TodoList extends React.Component {
             detailValue: ""
         };
         this.changeDetail = this.changeDetail.bind(this);
-        this.addTodo = this.addTodo.bind(this);
+        this._addTodo = this._addTodo.bind(this);
         this.deleteTodo = this.deleteTodo.bind(this);
     }
 
@@ -73,30 +98,11 @@ class TodoList extends React.Component {
     // how robust this is.  
 
     // let newData = this.state.data; original
+
     
-    addTodo() {
-        let newData = this.props.data;
-        let newComment = {
-            detail: this.state.detailValue,
-            id: Date.now()
-        }
-        newData.push(newComment);
-        console.log(newData);
-        this.setState({data: newData});
+    _addTodo() {
+        this.props.addTodo(this.state.detailValue);
         this.setState({detailValue: ""});
-        $.ajax({
-          url: this.props.url,
-          dataType: 'json',
-          type: 'POST',
-          data: newComment,
-          success: function(data) {
-            this.setState({data: data});
-          }.bind(this),
-          error: function(xhr, status, err) {
-            this.setState({data: newData});
-            console.error(this.props.url, status, err.toString());
-          }.bind(this)
-        });
     }
     
     //let newData = this.state.data.filter(function (todo) {
@@ -146,6 +152,7 @@ class TodoList extends React.Component {
     // updates state every 2 sec.  
     
     // the only thing that state should hold down here is the value of the text input
+    
     // changed to this.state.data from this.props.data
     // this.props.data gets data from initial render, but this.state.data gets the
     // most recent update.  Only way to fix is to move these functions, all 
@@ -165,7 +172,7 @@ class TodoList extends React.Component {
                     </tbody>
                 </table>
                 <div>
-                    <button style={style.buttonAdd} onClick={this.addTodo}>Add</button>
+                    <button style={style.buttonAdd} onClick={this._addTodo}>Add</button>
                     <input style={style.textField} type="text" value={this.state.detailValue} onChange={this.changeDetail}/>
                 </div>
             </div>
@@ -193,8 +200,6 @@ class Todo extends React.Component {
 
     //need to pass this.props.children instead, as detail isn't a direct prop
     _onDelete() {
-        //console.log(this.props);
-        console.log(this.props);
         this.props.onDelete(this.props.other_id);
     }
     
@@ -262,7 +267,7 @@ let style = {
         fontFamily : "Schoolbell, arial, serif",
         fontSize   : "25px",
         border: "2px solid black",
-        borderRadius: "3px"
+        borderRadius: "3px",
     }
 };
 
