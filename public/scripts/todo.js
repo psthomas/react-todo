@@ -107,9 +107,9 @@ class TodoList extends React.Component {
     
     // moved addTodo, deleteTodo to TodoBox above so state lives mainly up there
     _addTodo(e) {
-        e.preventDefault();
         this.props.addTodo(this.state.detailValue);
         this.setState({detailValue: ""});
+        e.preventDefault();
     }
     
   
