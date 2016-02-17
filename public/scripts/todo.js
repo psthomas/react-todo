@@ -76,11 +76,8 @@ class TodoBox extends React.Component {
         setInterval(this.loadList, this.props.pollInterval);
     }    
     
-    
-    
     //<TodoList data={this.props.data}/>
-    // changed, data is now a state variable that updates every 
-    // ajax query  
+    // changed, data is now a state variable that updates every ajax query  
     
     render() {
         return (
@@ -101,61 +98,20 @@ class TodoList extends React.Component {
         };
         this.changeDetail = this.changeDetail.bind(this);
         this._addTodo = this._addTodo.bind(this);
-        //this.deleteTodo = this.deleteTodo.bind(this);
     }
-
 
 
     changeDetail(e) {
         this.setState({detailValue: e.target.value});
     }
     
-    
-    //let newData = this.state.data; original
-    //this.props.data; allows the addition until the ajax query passes on
-    // the new props and re-renders.  Gah. 
-    // fixed by doing ajax query and updating server below, not sure
-    // how robust this is.  
-
-    // let newData = this.state.data; original
-
-    
-    _addTodo() {
+    // moved addTodo, deleteTodo to TodoBox above so state lives mainly up there
+    _addTodo(e) {
+        e.preventDefault();
         this.props.addTodo(this.state.detailValue);
         this.setState({detailValue: ""});
     }
     
-    //let newData = this.state.data.filter(function (todo) {
-
-    
-    //return <Todo title={obj.title} key={obj.title} onDelete={this.deleteTodo}>{obj.detail}</Todo>;
-    // Title:<input type="text" value={this.state.titleValue} onChange={this.changeTitle}/>
-    
-    //let todo = this.props.data.map(function (obj) {
-    // you you use props above, it loads the file data, but won't update with new addition
-    
-    //let todo = this.state.data.map(function (obj) {
-    // this allows additions, but won't render the initial content from server
-    // original version.  Note, the facebook tutorial uses this.props to 
-    // render: https://facebook.github.io/react/docs/tutorial.html
-    
-    //How to have both?  Why doesn't state update when todobox re renders it?
-    
-    // I need to define a method in TodoBox that is then passed as a property to 
-    // one of these, and is just called down here, changing the state above,
-    // and writing to the server.  problem is, I also need to do that for the
-    // checkboxes below for the forms.  but maybe not, the line-through doesn't
-    // seem to re-render.
-    // also need to do something similar for deletions. -- immediately delete and 
-    // update the state, then use ajax call to update server, which continuously
-    // updates state every 2 sec.  
-    
-    // the only thing that state should hold down here is the value of the text input
-    
-    // changed to this.state.data from this.props.data
-    // this.props.data gets data from initial render, but this.state.data gets the
-    // most recent update.  Only way to fix is to move these functions, all 
-    // state to the todoBox class above?  
   
     render() {
         let todo = this.props.data.map(function (obj) {
@@ -171,14 +127,16 @@ class TodoList extends React.Component {
                     </tbody>
                 </table>
                 <div>
-                    <button style={style.buttonAdd} onClick={this._addTodo}>Add</button>
+                    <form>
+                    <input type="submit" action="null" value="Add" style={style.buttonAdd} onClick={this._addTodo} />
                     <input style={style.textField} type="text" value={this.state.detailValue} onChange={this.changeDetail}/>
+                    </form>
                 </div>
             </div>
         );
     }
 }
-
+//<button style={style.buttonAdd} onClick={this._addTodo}>Add</button>
 
 class Todo extends React.Component {
     constructor(props) {
@@ -197,7 +155,7 @@ class Todo extends React.Component {
         });
     }
 
-    //need to pass this.props.children instead, as detail isn't a direct prop
+    //passes this.props.other_id because prop.key wasn't showing up
     _onDelete() {
         this.props.onDelete(this.props.other_id);
     }
@@ -216,7 +174,7 @@ class Todo extends React.Component {
         );
     }
 }
-//detail isn't a prop, it's a child, so will throw error.  
+// optional propType checking, disabled for now    
 // Todo.propTypes = {
 //     detail: React.PropTypes.string.isRequired
 // };
