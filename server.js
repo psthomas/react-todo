@@ -31,9 +31,6 @@ app.post('/api/list', function(req, res) {
       process.exit(1);
     }
     var comments = JSON.parse(data);
-    // NOTE: In a real implementation, we would likely rely on a database or
-    // some other approach (e.g. UUIDs) to ensure a globally unique id. We'll
-    // treat Date.now() as unique-enough for our purposes.
 
     var newComment = {
       detail: req.body.detail,
@@ -80,5 +77,5 @@ app.post('/api/list/delete', function(req, res) {
 
 
 app.listen(app.get('port'), function() {
-  //console.log('Server started: http://localhost:' + app.get('port') + '/');
+  console.log('Server started: http://localhost:' + app.get('port') + '/');
 });
