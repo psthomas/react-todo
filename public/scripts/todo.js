@@ -6,6 +6,7 @@ class TodoBox extends React.Component {
         this.state = { data: [] };
         this.loadList = this.loadList.bind(this);
         this.addTodo = this.addTodo.bind(this);
+        this.deleteTodo = this.deleteTodo.bind(this);
     }
     
     
@@ -47,6 +48,29 @@ class TodoBox extends React.Component {
         });
     }
     
+    
+    deleteTodo(other_id) {
+        let newData = this.state.data.filter(function (todo) {
+            return +todo.id !== +other_id;
+        });
+
+        this.setState({data: newData});
+
+        $.ajax({
+          url: this.props.url + "/delete",
+          dataType: 'json',
+          type: 'POST',
+          data: {id: other_id},
+          success: function(data) {
+            this.setState({data: data});
+          }.bind(this),
+          error: function(xhr, status, err) {
+            this.setState({data: newData});
+            console.error(this.props.url, status, err.toString());
+          }.bind(this)
+        });
+    }
+    
     componentDidMount() {
         this.loadList(); 
         setInterval(this.loadList, this.props.pollInterval);
@@ -62,7 +86,7 @@ class TodoBox extends React.Component {
         return (
             <div style={style.todoBox}>
                 <h1 style={style.header}>To do:</h1>
-                <TodoList url={this.props.url} addTodo={this.addTodo} data={this.state.data}/>
+                <TodoList url={this.props.url} addTodo={this.addTodo} onDelete={this.deleteTodo} data={this.state.data}/>
             </div>
         );
     }
@@ -77,14 +101,10 @@ class TodoList extends React.Component {
         };
         this.changeDetail = this.changeDetail.bind(this);
         this._addTodo = this._addTodo.bind(this);
-        this.deleteTodo = this.deleteTodo.bind(this);
+        //this.deleteTodo = this.deleteTodo.bind(this);
     }
 
-    
-    //   this.state = {
-    //         data: this.props.data,
-    //         detailValue: ""
-    //     };
+
 
     changeDetail(e) {
         this.setState({detailValue: e.target.value});
@@ -107,27 +127,6 @@ class TodoList extends React.Component {
     
     //let newData = this.state.data.filter(function (todo) {
 
-    deleteTodo(other_id) {
-        let newData = this.state.data.filter(function (todo) {
-            return +todo.id !== +other_id;
-        });
-
-        this.setState({data: newData});
-
-        $.ajax({
-          url: this.props.url + "/delete",
-          dataType: 'json',
-          type: 'POST',
-          data: {id: other_id},
-          success: function(data) {
-            this.setState({data: data});
-          }.bind(this),
-          error: function(xhr, status, err) {
-            this.setState({data: newData});
-            console.error(this.props.url, status, err.toString());
-          }.bind(this)
-        });
-    }
     
     //return <Todo title={obj.title} key={obj.title} onDelete={this.deleteTodo}>{obj.detail}</Todo>;
     // Title:<input type="text" value={this.state.titleValue} onChange={this.changeTitle}/>
@@ -160,7 +159,7 @@ class TodoList extends React.Component {
   
     render() {
         let todo = this.props.data.map(function (obj) {
-            return <Todo key={+obj.id} other_id={+obj.id} onDelete={this.deleteTodo}>{obj.detail}</Todo>;
+            return <Todo key={+obj.id} other_id={+obj.id} onDelete={this.props.onDelete}>{obj.detail}</Todo>;
         }.bind(this));
 
 
@@ -276,8 +275,5 @@ let style = {
 var data = [{detail: 'make a list'}, {detail: "check it twice"}];
 
 
-//<TodoBox data = {data} /> 
 
-//pollInterval={2000} originally
-
-ReactDOM.render(<TodoBox url="https://demo-project-psthomas.c9.io/api/list" pollInterval={500}/>, document.getElementById('table'));
+ReactDOM.render(<TodoBox url="https://demo-project-psthomas.c9.io/api/list" pollInterval={2000}/>, document.getElementById('table'));
